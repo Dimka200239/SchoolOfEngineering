@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FileWorkerEXE", "Task_2\Fil
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TextParserLib", "TextPapserLib\TextParserLib.csproj", "{016769CE-B4D8-47A1-B0C9-8684B3A8A55F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AbstractClassInstance", "AbstractClassInstance\AbstractClassInstance.csproj", "{307E4BED-DD7F-4A22-8757-9B5EAA3DDB18}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{016769CE-B4D8-47A1-B0C9-8684B3A8A55F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{016769CE-B4D8-47A1-B0C9-8684B3A8A55F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{016769CE-B4D8-47A1-B0C9-8684B3A8A55F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{307E4BED-DD7F-4A22-8757-9B5EAA3DDB18}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{307E4BED-DD7F-4A22-8757-9B5EAA3DDB18}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{307E4BED-DD7F-4A22-8757-9B5EAA3DDB18}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{307E4BED-DD7F-4A22-8757-9B5EAA3DDB18}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
