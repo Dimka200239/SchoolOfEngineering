@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Text;
@@ -32,7 +33,7 @@ namespace FileWorkerEXE
             Console.Write("Введите путь к файлу с текстом: ");
             var inputFilePath = Console.ReadLine();
 
-            string text = File.ReadAllText(inputFilePath).ToLower(); // Читаем весь текст из файла и приводим его к нижнему регистру
+            string[] text = File.ReadAllLines(inputFilePath); // Читаем весь текст из файла и приводим его к нижнему регистру
 
             #region Работа с System.Reflection
 
@@ -45,13 +46,32 @@ namespace FileWorkerEXE
             // Получаем метод Parse с флагом BindingFlags.NonPublic | BindingFlags.Instance
             var parserMethod = type.GetMethod("Parse", BindingFlags.NonPublic | BindingFlags.Instance);
 
+            var fisrtStopwatch = new Stopwatch();
+
+            fisrtStopwatch.Start();
             // Передаем строку для парсинга в метод Parse через объект parserInstance
-            var result = parserMethod.Invoke(parserInstance, new object[] { text }) as Dictionary<string, int>;
+            var firstResult = parserMethod.Invoke(parserInstance, new object[] { text }) as Dictionary<string, int>;
+            fisrtStopwatch.Stop();
+
+            Console.WriteLine("Прямой метод выполнился за {0} ms", fisrtStopwatch.ElapsedMilliseconds);
+
+            #endregion
+
+            #region Работа с многопоточным методом
+
+            var secondStopwatch = new Stopwatch();
+
+            secondStopwatch.Start();
+            // Вызываем многопоточный метод MultithreadedParser для парсинга текста
+            var secondResult = parserInstance.MultithreadedParser(text);
+            secondStopwatch.Stop();
+
+            Console.WriteLine("Многопоточный метод выполнился за {0} ms", secondStopwatch.ElapsedMilliseconds);
 
             #endregion
 
             var resultString = new StringBuilder("");
-            foreach (var value in result)
+            foreach (var value in firstResult)
             {
                 resultString.Append($"{value.Key}\t{value.Value}\n");
             }

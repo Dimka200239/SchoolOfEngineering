@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 
 namespace TextParserLib
 {
@@ -12,27 +14,64 @@ namespace TextParserLib
         /// <summary>
         /// Метод для парсинга большого текста.
         /// </summary>
-        /// <param name="text">Передаваемый текст.</param>
+        /// <param name="text">Передаваемый массив строк текста.</param>
         /// <returns>Словарь с ключами и значениями, где ключ - слово, значение - его кол-во в тексте.</returns>
-        private Dictionary<string, int> Parse(string text)
+        private Dictionary<string, int> Parse(string[] text)
         {
             var wordsDict = new Dictionary<string, int>();
             
             Regex regex = new Regex(@"\b(?![×÷])[A-Za-zÀ-ÿа-яА-Я']+\b");
 
-            MatchCollection words = regex.Matches(text);
-            
-            foreach (Match word in words)
+            foreach (var line in text)
             {
-                if (wordsDict.ContainsKey(word.Value) == false)
+                foreach (Match word in regex.Matches(line.ToLower()))
                 {
-                    wordsDict.Add(word.Value, 1);
-                }
-                else
-                {
-                    wordsDict[word.Value]++;
+                    if (wordsDict.ContainsKey(word.Value) == false)
+                    {
+                        wordsDict.Add(word.Value, 1);
+                    }
+                    else
+                    {
+                        wordsDict[word.Value]++;
+                    }
                 }
             }
+
+            var ordered = wordsDict.OrderByDescending(x => x.Value).ToDictionary(x => x.Key, x => x.Value);
+
+            return ordered;
+        }
+
+        /// <summary>
+        /// Метод для парсинга большого текста.
+        /// </summary>
+        /// <param name="text">Передаваемый массив строк текста.</param>
+        /// <returns>Словарь с ключами и значениями, где ключ - слово, значение - его кол-во в тексте.</returns>
+        public Dictionary<string, int> MultithreadedParser(string[] text)
+        {
+            var wordsDict = new Dictionary<string, int>();
+
+            Regex regex = new Regex(@"\b(?![×÷])[A-Za-zÀ-ÿа-яА-Я']+\b");
+
+            object locker = new object();
+
+            Parallel.ForEach(text, line =>
+            {
+                foreach (Match word in regex.Matches(line.ToLower()))
+                {
+                    lock (locker)
+                    {
+                        if (wordsDict.ContainsKey(word.Value) == false)
+                        {
+                            wordsDict.Add(word.Value, 1);
+                        }
+                        else
+                        {
+                            wordsDict[word.Value]++;
+                        }
+                    }
+                }
+            });
 
             var ordered = wordsDict.OrderByDescending(x => x.Value).ToDictionary(x => x.Key, x => x.Value);
 
