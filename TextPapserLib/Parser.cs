@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -49,27 +50,15 @@ namespace TextParserLib
         /// <returns>Словарь с ключами и значениями, где ключ - слово, значение - его кол-во в тексте.</returns>
         public Dictionary<string, int> MultithreadedParser(string[] text)
         {
-            var wordsDict = new Dictionary<string, int>();
+            var wordsDict = new ConcurrentDictionary<string, int>();
 
             Regex regex = new Regex(@"\b(?![×÷])[A-Za-zÀ-ÿа-яА-Я']+\b");
-
-            object locker = new object();
 
             Parallel.ForEach(text, line =>
             {
                 foreach (Match word in regex.Matches(line.ToLower()))
                 {
-                    lock (locker)
-                    {
-                        if (wordsDict.ContainsKey(word.Value) == false)
-                        {
-                            wordsDict.Add(word.Value, 1);
-                        }
-                        else
-                        {
-                            wordsDict[word.Value]++;
-                        }
-                    }
+                    wordsDict.AddOrUpdate(word.Value, 1, (key, oldValue) => oldValue + 1);
                 }
             });
 

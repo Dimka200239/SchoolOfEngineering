@@ -1,9 +1,15 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Json;
 using System.Reflection;
 using System.Text;
+using System.Text.Json.Serialization;
+using System.Threading.Tasks;
 using TextParserLib;
 
 namespace FileWorkerEXE
@@ -49,8 +55,10 @@ namespace FileWorkerEXE
             var fisrtStopwatch = new Stopwatch();
 
             fisrtStopwatch.Start();
+
             // Передаем строку для парсинга в метод Parse через объект parserInstance
             var firstResult = parserMethod.Invoke(parserInstance, new object[] { text }) as Dictionary<string, int>;
+
             fisrtStopwatch.Stop();
 
             Console.WriteLine("Прямой метод выполнился за {0} ms", fisrtStopwatch.ElapsedMilliseconds);
@@ -62,8 +70,11 @@ namespace FileWorkerEXE
             var secondStopwatch = new Stopwatch();
 
             secondStopwatch.Start();
+
             // Вызываем многопоточный метод MultithreadedParser для парсинга текста
-            var secondResult = parserInstance.MultithreadedParser(text);
+
+            var secondResult = GetResultFromServise(text).Result;
+
             secondStopwatch.Stop();
 
             Console.WriteLine("Многопоточный метод выполнился за {0} ms", secondStopwatch.ElapsedMilliseconds);
@@ -71,7 +82,7 @@ namespace FileWorkerEXE
             #endregion
 
             var resultString = new StringBuilder("");
-            foreach (var value in firstResult)
+            foreach (var value in secondResult)
             {
                 resultString.Append($"{value.Key}\t{value.Value}\n");
             }
@@ -86,6 +97,20 @@ namespace FileWorkerEXE
             }
 
             Console.WriteLine("Работа программы завершена...");
+        }
+
+        private static async Task<Dictionary<string, int>> GetResultFromServise(string[] text)
+        {
+            using (var client = new HttpClient())
+            {
+                client.BaseAddress = new Uri("https://localhost:44320");
+
+                var response = await client.PostAsJsonAsync("/api/textController/ParseText", text);
+
+                string responseContent = await response.Content.ReadAsStringAsync();
+
+                return JsonConvert.DeserializeObject<Dictionary<string, int>>(responseContent);
+            }
         }
     }
 }
